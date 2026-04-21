@@ -141,54 +141,68 @@ export default function FormularioRegistroEquipo() {
         }
     }
 
+    const Cell = ({children}:{children:any}) => (
+        <div className="border border-gray-400 p-2">
+            {children}
+        </div>
+    )
+
     return (
         <PageContainer>
-            <form onSubmit={handleSubmit} className="bg-white border shadow-lg">7
-                <div className="flex justify-between items-center border-b p-4">
-                     <h1 className="text-xl font-bold">
+            <form onSubmit={handleSubmit} className="w-full border shadow-lg bg-[var(--color-form-bg)] border-[var(--color-border)]">
+           <div className="grid-grid-cols-3 border-b">
+            <div className="col-span-2 p-4 font-bold text-lg">
                         HOJA DE VIDA DEL EQUIPO BIOMÉDICO
-                    </h1>
                 </div>
-                <div className="p-6 border-b">
-                    <h2 className="font-semibold mb-4">
-                        I. INFORMACIÓN GENERAL
-                    </h2>
-
-                    {error && (
-                        <p className="text-red-500 mb-4">
-                            {error}
-                        </p>
-                    )}
-                </div>
-                <div className="grid grid-cols gap-4">
-                 <InputField
-                    label="Nombre del Equipo"
-                    name="nombre"
-                    type="text"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                  />
-                  <InputField 
-                    label="Serie"
-                    name="serie"
-                    value={formData.serie}
-                    onChange={handleChange}
-                  />
-                  <SelectField
-                   label="Marca"
-                   name="marca"
-                   value={formData.marca}
-                   onChange={handleMarca}
-                   options={marcas}
-                   />
-                   {crearMarca && (
-                    <InputField 
-                    label="Nueva Marca"
-                    name="nuevaMarca"
-                    value={nuevaMarca}
-                    onChange={(e:any) => setNuevaMarca(e.target.value)}/>
-                   )}
-                   <SelectField
+                  <div className="border-1 p-2 text-xs">
+                    <p>Formato</p>
+                    <p>Revisado</p>
+                    <p>Aprobado</p>
+            </div>
+           </div>
+            <div className="bg-gray-100 border-b p-2 font-semibold text-sm">
+                    INFORMACIÓN TÉCNICA
+            </div>
+            <div className="grid grid-cols-5">
+                    <Cell>Nombre equipo</Cell>
+                    <Cell>Marca</Cell>
+                    <Cell>No. Placa</Cell>
+                    <Cell>No. Serie</Cell>
+                    <Cell>
+                         <InputField
+                        label="Nombre del Equipo"
+                        name="nombre"
+                        type="text"
+                        value={formData.nombre}
+                        onChange={handleChange}
+                     />
+                    </Cell>
+                    <Cell>
+                         <InputField 
+                        label="Serie"
+                        name="serie"
+                        value={formData.serie}
+                        onChange={handleChange}
+                        />
+                    </Cell>
+                    <Cell>
+                        <SelectField
+                        label="Marca"
+                        name="marca"
+                        value={formData.marca}
+                        onChange={handleMarca}
+                        options={marcas}
+                        />
+                         {crearMarca && (
+                        <InputField 
+                        label="Nueva Marca"
+                        name="nuevaMarca"
+                        value={nuevaMarca}
+                        onChange={(e:any) => setNuevaMarca(e.target.value)}/>
+                        )}
+                    </Cell>
+                    <Cell>
+                       <SelectField
                     label="Modelo"
                     name="modelo"
                     value={formData.modelo}
@@ -202,6 +216,8 @@ export default function FormularioRegistroEquipo() {
                         value={nuevoModelo}
                         onChange={(e:any) => setNuevoModelo(e.target.value)} />
                     )}
+                </Cell>      
+                <Cell> 
                     <SelectField
                     label="Tipo Tecnología"
                     name="tipoTecnologia"
@@ -216,7 +232,10 @@ export default function FormularioRegistroEquipo() {
                         value={nuevaTecnologia}
                         onChange={(e:any) => setNuevaTecnologia(e.target.value)}/>
                     )}
-                    <SelectField
+                </Cell>
+                 
+            <Cell>
+                          <SelectField
                     label="Fabricante"
                     name="fabricante"
                     value={formData.fabricante}
@@ -230,9 +249,9 @@ export default function FormularioRegistroEquipo() {
                         value={nuevoFabricante}
                         onChange={(e:any) => setNuevoFabricante(e.target.value)} />
                     )}
-                </div>
-                <div className="mt-4">
-                    <SelectField
+            </Cell>
+            <Cell>
+                 <SelectField
                     label="Ubicación"
                     name="ubicacion"
                     value={formData.ubicacion}
@@ -246,35 +265,74 @@ export default function FormularioRegistroEquipo() {
                         value={nuevaUbicacion}
                         onChange={(e:any) => setNuevaUbicacion(e.target.value)} />
                     )}
-                </div>
-                <div className="p-6 border-b">
-                    <h2 className="font-semibold mb-4">
-                        II. DOCUMENTACIÓN
-                    </h2>
-                    <button type="button" className="border px-4 py-2 hover:bg-gray-100">
-                        Subir archivo
-                    </button>
-                    <button type="button" className="border px-4 py-2 hover:bg-gray-100">
-                        Ver archivos
-                    </button>
-                </div>
-                <div className="flex gap-4">
-                    <button type="button" className="border px-4 py-2 hover:bg-gray-100">
-                        Generar QR
-                    </button>
-                     <button type="button" className="border px-4 py-2 hover:bg-gray-100">
-                        Ver QR
-                    </button>
-                </div>
-                <div className="flex justify-end gap-4 p-4">
-                    <button className="px-6 py-2 bg-red-600 text-white hover:bg-red-700" disabled={loading}>
-                        {loading ? "Guardando...":"Guardar Equipo"}
-                    </button>
-                    <button className="border px-6 py-2" type="button" onClick={() => router.push("/dashboard")}>
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </PageContainer>
+            </Cell>
+            <Cell>
+                {error && (
+                        <p className="text-red-500 mb-4">
+                            {error}
+                        </p>
+                    )}
+            </Cell>  
+            </div>  
+            <div className="border-t p-3 flex gap-6">
+                <span className="font-semibold text-sm">
+                    Estado del Equipo
+                </span>
+            </div>   
+            <label className="flex gap-2">
+                <input type="checkbox"  /> Bueno
+            </label>
+             <label className="flex gap-2">
+                <input type="checkbox"  /> Regular
+            </label>
+             <label className="flex gap-2">
+                <input type="checkbox"  /> Malo
+            </label>
+             <label className="flex gap-2">
+                <input type="checkbox"  /> Desarmado
+            </label>
+
+         <div className="border-t p-3 flex gap-6">
+            <span className="font-semibold text-sm">
+                    Detalle mantenimiento
+                </span>
+                <label className="flex gap-2">
+                <input type="checkbox"  /> Preventivo
+            </label>
+             <label className="flex gap-2">
+                <input type="checkbox"  /> Correctivo
+            </label>
+             <label className="flex gap-2">
+                <input type="checkbox"  /> Instalación
+            </label>
+             <label className="flex gap-2">
+                <input type="checkbox"  /> Desmontaje
+            </label>
+         </div>
+         <div className="border-t p-3 flex gap-6 flex-wrap">
+            <span className="font-semibold text-sm">
+                    Fallas Detectadas
+            </span>
+            <label className="flex gap-2">
+            <input type="checkbox"  /> Depreciación
+            </label>
+             <label className="flex gap-2">
+                <input type="checkbox"  /> Mala operación
+            </label>
+             <label className="flex gap-2">
+                <input type="checkbox"  /> Mal instalado
+            </label>
+             <label className="flex gap-2">
+                <input type="checkbox"  /> Accesorios
+            </label>
+              <label className="flex gap-2">
+                <input type="checkbox"  /> Desconocido
+            </label>
+              <label className="flex gap-2">
+                <input type="checkbox"  /> Sin fallas
+            </label>
+         </div>
+        </form>
+    </PageContainer>
     )
 }
