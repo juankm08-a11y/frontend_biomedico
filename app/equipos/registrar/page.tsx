@@ -1,4 +1,4 @@
-import FormularioRegistroEquipo from "@/components/equipos/FormularioRegistrarEquipo";
+import FormularioRegistroEquipo from "@/components/equipos/registrar/FormularioRegistrarEquipo";
 
 export default function RegistroHojaVidaEquipoPage() {
     return (

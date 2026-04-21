@@ -6,6 +6,7 @@ export interface EquipoRequest {
     fabricante:number;
     tipoTecnologia:number;
     ubicacion:number;
+    placa:string;
 }
 
 export interface EquipoResponse {
@@ -18,6 +19,7 @@ export interface EquipoResponse {
     tipoTecnologia:number
     ubicacion:number
     fechaRegistro:string
+    placa:string
 }
 
 export interface QRResponse {

@@ -1,5 +1,5 @@
 import { api } from "@/lib/api"
-import { EquipoRequest, EquipoResponse } from "@/types/equipo.type";
+import { EquipoRequest, EquipoResponse } from "@/types/Equipo.type";
 
 
 export const crearEquipo = async (

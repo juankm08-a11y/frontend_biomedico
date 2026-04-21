@@ -3,14 +3,14 @@ import { useAction } from "@/hooks/useAction";
 import { useError } from "@/hooks/useError";
 import { UseForm } from "@/hooks/useForm";
 import { useHandle } from "@/hooks/useHandle";
-import PageContainer from "../ui/layout/PageContainer";
+import PageContainer from "../../ui/layout/PageContainer";
 import { useRouter } from "next/navigation";
-import { EquipoRequest } from "@/types/equipo.type";
 import { equipoToForm } from "@/mappers/equipo.mapper";
 import { crearEquipo } from "@/services/equipo.service";
-import InputField from "../ui/input/InputField";
-import SelectField from "../ui/input/SelectField";
-import { useState } from "react";
+import InputField from "../../ui/input/InputField";
+import SelectField, { Option } from "../../ui/input/SelectField";
+import { useEffect, useState } from "react";
+import { EquipoRequest } from "@/types/Equipo.type";
 
 export default function FormularioRegistroEquipo() {
     const router = useRouter();
@@ -26,8 +26,23 @@ export default function FormularioRegistroEquipo() {
     const [nuevoFabricante,setNuevoFabricante] = useState("")
     const [nuevaUbicacion,setNuevaUbicacion] = useState("")
 
+    const [equipos,setEquipos] = useState<Option[]>([]);
+
     const {formData,handleChange} = 
     UseForm<EquipoRequest>(equipoToForm())
+
+    useEffect(() => {
+        fetch("http://localhost:8000/api/equipos/")
+        .then(res => res.json())
+        .then(data => {
+              const options = data.map((e:any) => ({
+            value:e.nombre,
+            label:e.nombre
+        }))
+
+        setEquipos(options)
+        })
+    },[])
 
     const {error } = useError()
 
@@ -52,49 +67,49 @@ export default function FormularioRegistroEquipo() {
         router.push("/dashboard")
     }
 
-    const marcas = [
+    const [marcas,setMarcas] = useState([
         {value:"1",label:"Philips"},
         {value:"2",label:"GE Healthcare"},
         {value:"3",label:"Siemenens"},
         {value:"4",label:"Mindray"},
         {value:"5",label:"Drager"},
         {value:"new",label:"+ Crear nueva marca"}
-    ]
+    ])
 
-    const modelos = [
+    const [modelos,setModelos] = useState([
         {value:"1",label:"Philips Medical System"},
         {value:"2",label:"GE Healthcare"},
         {value:"3",label:"Siemenens Healthineers"},
         {value:"4",label:"Mindray Bio-Medical Electronics"},
         {value:"5",label:"Dragerwerk AG"},
         {value:"new",label:"Crear nuevo modelo"}
-    ]
+    ])
 
-    const tecnologias = [
+    const [tecnologias,setTecnologias] = useState([
         {value:"1",label:"Philips Medical System"},
         {value:"2",label:"GE Healthcare"},
         {value:"3",label:"Siemenens Healthineers"},
         {value:"4",label:"Mindray Bio-Medical Electronics"},
         {value:"5",label:"Dragerwerk AG"},
         {value:"new",label:"+ Crear nueva tecnologia"}
-    ]
+    ])
 
-    const fabricantes = [
+    const [fabricantes,setFabricantes] = useState([
         {value:"1",label:""},
         {value:"2",label:"Imagenología"},
         {value:"3",label:"Soporte Vital"},
         {value:"4",label:"Diagnóstico"},
         {value:"5",label:"Terapéutico"},
         {value:"new",label:"+ Crear nuevo fabricante"}
-    ]
+    ])
 
-    const ubicaciones = [
+    const [ubicaciones,setUbicaciones] = useState([
         {value:"1",label:"Pabón - UCI 6 piso"},
         {value:"2",label:"Pabón - Hemodinamia"},
         {value:"3",label:"Centro Cuidados - Farmacia"},
         {value:"4",label:"Centro Cuidados - Laboratorio"},
         {value:"new",label:"+ Crear nueva Ubicacion"}
-    ]
+    ])
 
     const handleMarca = (e:any) => {
         if (e.target.value === "new"){
@@ -155,30 +170,35 @@ export default function FormularioRegistroEquipo() {
                         HOJA DE VIDA DEL EQUIPO BIOMÉDICO
                 </div>
                   <div className="border-1 p-2 text-xs">
-                    <p>Formato</p>
-                    <p>Revisado</p>
-                    <p>Aprobado</p>
+                    <Cell>Formato</Cell>
+                    <Cell>Revisado</Cell>
+                    <Cell>Aprobado</Cell>
             </div>
            </div>
             <div className="bg-gray-100 border-b p-2 font-semibold text-sm">
                     INFORMACIÓN TÉCNICA
             </div>
             <div className="grid grid-cols-5">
-                    <Cell>Nombre equipo</Cell>
-                    <Cell>Marca</Cell>
-                    <Cell>No. Placa</Cell>
-                    <Cell>No. Serie</Cell>
                     <Cell>
-                         <InputField
+                        <SelectField
                         label="Nombre del Equipo"
                         name="nombre"
-                        type="text"
                         value={formData.nombre}
                         onChange={handleChange}
+                        options={equipos}
                      />
                     </Cell>
                     <Cell>
-                         <InputField 
+                        <InputField
+                        label="Número de Placa"
+                        name="placa"
+                        type="text"
+                        value={formData.placa}
+                        onChange={handleChange}
+                        />
+                    </Cell>
+                    <Cell>
+                        <InputField 
                         label="Serie"
                         name="serie"
                         value={formData.serie}
@@ -234,8 +254,8 @@ export default function FormularioRegistroEquipo() {
                     )}
                 </Cell>
                  
-            <Cell>
-                          <SelectField
+                <Cell>
+                    <SelectField
                     label="Fabricante"
                     name="fabricante"
                     value={formData.fabricante}
@@ -249,8 +269,8 @@ export default function FormularioRegistroEquipo() {
                         value={nuevoFabricante}
                         onChange={(e:any) => setNuevoFabricante(e.target.value)} />
                     )}
-            </Cell>
-            <Cell>
+                </Cell>
+                <Cell>
                  <SelectField
                     label="Ubicación"
                     name="ubicacion"
@@ -265,8 +285,8 @@ export default function FormularioRegistroEquipo() {
                         value={nuevaUbicacion}
                         onChange={(e:any) => setNuevaUbicacion(e.target.value)} />
                     )}
-            </Cell>
-            <Cell>
+                </Cell>
+                <Cell>
                 {error && (
                         <p className="text-red-500 mb-4">
                             {error}
@@ -280,16 +300,16 @@ export default function FormularioRegistroEquipo() {
                 </span>
             </div>   
             <label className="flex gap-2">
-                <input type="checkbox"  /> Bueno
+                <input type="checkbox" name="estado_bueno" /> Bueno
             </label>
              <label className="flex gap-2">
-                <input type="checkbox"  /> Regular
+                <input type="checkbox" name="estado_regular" /> Regular
             </label>
              <label className="flex gap-2">
-                <input type="checkbox"  /> Malo
+                <input type="checkbox" name="estado_malo" /> Malo
             </label>
              <label className="flex gap-2">
-                <input type="checkbox"  /> Desarmado
+                <input type="checkbox" name="estado_desarmado" /> Desarmado
             </label>
 
          <div className="border-t p-3 flex gap-6">
@@ -297,16 +317,16 @@ export default function FormularioRegistroEquipo() {
                     Detalle mantenimiento
                 </span>
                 <label className="flex gap-2">
-                <input type="checkbox"  /> Preventivo
+                <input type="checkbox" name="mant_preventivo"  /> Preventivo
             </label>
              <label className="flex gap-2">
-                <input type="checkbox"  /> Correctivo
+                <input type="checkbox" name="mant_correctivo"  /> Correctivo
             </label>
              <label className="flex gap-2">
-                <input type="checkbox"  /> Instalación
+                <input type="checkbox" name="mant_instalacion" /> Instalación
             </label>
              <label className="flex gap-2">
-                <input type="checkbox"  /> Desmontaje
+                <input type="checkbox"  name="mant_desmontaje" /> Desmontaje
             </label>
          </div>
          <div className="border-t p-3 flex gap-6 flex-wrap">
@@ -314,24 +334,27 @@ export default function FormularioRegistroEquipo() {
                     Fallas Detectadas
             </span>
             <label className="flex gap-2">
-            <input type="checkbox"  /> Depreciación
+            <input type="checkbox" name="falla_depreciacion"  /> Depreciación
             </label>
              <label className="flex gap-2">
-                <input type="checkbox"  /> Mala operación
+                <input type="checkbox" name="falla_mala_operacion" /> Mala operación
             </label>
              <label className="flex gap-2">
-                <input type="checkbox"  /> Mal instalado
+                <input type="checkbox" name="falla_mal_instalado" /> Mal instalado
             </label>
              <label className="flex gap-2">
-                <input type="checkbox"  /> Accesorios
+                <input type="checkbox" name="falla_accesorios"  /> Accesorios
             </label>
               <label className="flex gap-2">
-                <input type="checkbox"  /> Desconocido
+                <input type="checkbox" name="falla_desconocido"  /> Desconocido
             </label>
               <label className="flex gap-2">
-                <input type="checkbox"  /> Sin fallas
+                <input type="checkbox" name="falla_sin_fallas"  /> Sin fallas
             </label>
          </div>
+          <button type="submit" onClick={handleSubmit}>
+                Guardar Equipo
+            </button>
         </form>
     </PageContainer>
     )
