@@ -31,7 +31,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
 
 # vercel
 .vercel
@@ -55,7 +55,5 @@ AGENTS.md
 #claude
 claude.md
 
-
-__pycache__/
-*.pyc
-.env
+# env
+.env.local
