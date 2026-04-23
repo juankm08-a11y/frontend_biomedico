@@ -13,6 +13,9 @@ export default function DashboardPage() {
             <button onClick={() => router.push("/equipos/")}>
                 Equipo
             </button>
+            <button onClick={() => router.push("/usuarios/registro/")}>
+                Panel Administrativo "En desarrollo"
+            </button>
         </div>
     )
 }
