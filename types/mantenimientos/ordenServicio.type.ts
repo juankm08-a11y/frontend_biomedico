@@ -1,4 +1,4 @@
-export type EstadoMantenimiento = 
+export type EstadoOrden = 
     | "pendiente"
     | "aprobada"
     | "ejecutada"
@@ -12,7 +12,7 @@ export interface OrdenServicioRequest {
 
     descripcion: string 
 
-    estado: EstadoMantenimiento
+    estado: EstadoOrden
 }
 
 export interface OrdenServicioResponse {
@@ -29,5 +29,5 @@ export interface OrdenServicioResponse {
 
     fechaFin: string 
 
-    estado: EstadoMantenimiento
+    estado: EstadoOrden
 }

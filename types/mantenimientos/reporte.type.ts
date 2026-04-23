@@ -1,7 +1,7 @@
 
 export interface ReporteSistemaRequest {
 
-    equipo?: number 
+    mantenimiento: number 
 
     nombre: string 
 
@@ -20,7 +20,7 @@ export interface ReporteSistema {
 
     totalMantenimientos: number 
 
-    mantenimientosPendiente: number 
+    mantenimientosPendientes: number 
 
     ordenesEjecutadas: number 
 }

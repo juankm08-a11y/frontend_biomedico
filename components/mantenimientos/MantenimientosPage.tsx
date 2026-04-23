@@ -2,15 +2,15 @@
 
 import DataTable, { Column } from "@/components/ui/table/DataTable";
 import { listarMantenimientos } from "@/services/mantenimientos/mantenimiento.service";
-import { MantenimientoResponse, TipoMantenimiento } from "@/types/mantenimientos/mantenimiento.type";
+import { EstadoMantenimiento, MantenimientoRequest, MantenimientoResponse, TipoMantenimiento } from "@/types/mantenimientos/mantenimiento.type";
 import { useEffect, useState } from "react";
-import { EquipoResponse } from '../../../types/equipos/equipo.type';
+import { EquipoResponse } from '../../types/equipos/equipo.type';
 import PrimaryButton from "@/components/ui/button/PrimaryButton";
 import PageContainer from "@/components/ui/layout/PageContainer";
 import Card from "@/components/ui/cards/Card";
 import ButtonGrid from "@/components/ui/layout/ButtonGrid";
 import { listarEquipos } from "@/services/equipos/equipo.service";
-import { EstadoMantenimiento, OrdenServicioRequest, OrdenServicioResponse } from "@/types/mantenimientos/ordenServicio.type";
+import { EstadoOrden, OrdenServicioRequest, OrdenServicioResponse } from "@/types/mantenimientos/ordenServicio.type";
 import { crearOrden, listarOrdenes } from "@/services/mantenimientos/ordenesServicio.service";
 import { ProgramacionMantenimientoRequest, ProgramacionMantenimientoResponse, UnidadFrecuencia } from "@/types/mantenimientos/programacionMantenimiento.type";
 import { consultarProgramacion, crearProgramacion } from "@/services/mantenimientos/programacionMantenimiento.service";
@@ -18,9 +18,12 @@ import { api } from "@/lib/api";
 import { UsuarioResponse } from "@/types/usuarios/Usuario.type";
 import { consultarUsuarios } from "@/services/usuarios/usuario.service";
 import { crearCertificado } from "@/services/mantenimientos/certificados.service";
+import { useRouter } from "next/navigation";
+import { crearMantenimiento } from '../../services/mantenimientos/mantenimiento.service';
 
 export default function MantenimientosPage({tipo}:{tipo:string}) {
     const [mantenimientos,setMantenimientos] = useState<MantenimientoResponse[]>([])
+    const [mostrarFormularioMantenimiento,setMostrarFormularioMantenimiento] = useState(false)
     const [mantenimientoSeleccionado, setMantenimientoSeleccionado] = useState<MantenimientoResponse | null>(null)
     const [mantenimientoOrden,setMantenimientoOrden] = useState<MantenimientoResponse | null>(null)
     const [mantenimientoOrdenes,setMantenimientoOrdenes] = useState<MantenimientoResponse | null>(null)
@@ -28,8 +31,17 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
     const [mantenimientoProgramaciones,setMantenimientoProgramaciones] = useState<MantenimientoResponse | null>(null)
     const [mantenimientoCertificado, setMantenimientoCertificado] = useState<MantenimientoResponse | null>(null)
 
+    const [equipo,setEquipo] = useState<number>(0)
+    const [responsable,setResponsable] = useState<number>(0)
+
+    const [tipoMantenimiento,setTipoMantenimiento] = useState<TipoMantenimiento>("preventivo")
+    const [estadoMantenimiento,setEstadoMantenimiento] = useState<EstadoMantenimiento>("pendiente")
+
+    const [fechaInicio,setFechaInicio] = useState("")
+    const [fechaFin,setFechaFin] = useState("")
+
     const [tipoServicio,setTipoServicio] = useState<TipoMantenimiento>("preventivo")
-    const [estado,setEstado] = useState<EstadoMantenimiento>("pendiente")
+    const [estado,setEstado] = useState<EstadoOrden>("pendiente")
     const [descripcion,setDescripcion] = useState("")
 
     const [equipos,setEquipos] = useState<EquipoResponse[]>([])
@@ -46,12 +58,16 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
 
     const [usuarios,setUsuarios] = useState<UsuarioResponse[]>([])
 
+    const router = useRouter()
+
     useEffect(() => {
 
         listarMantenimientos(tipo)
         .then((data) => {
             setMantenimientos(data)
         })
+
+        console.log("mantenimientos:", mantenimientos)
 
         listarEquipos()
         .then(setEquipos)
@@ -72,6 +88,30 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
 
         cargarUsuarios()
     },[])
+
+    const handleCrearMantenimiento = async (e:any) => {
+
+        e.preventDefault()
+
+        if (!equipo || !responsable) {
+            alert("Seleccione el equipo y responsable")
+        }
+
+        const data:MantenimientoRequest = {
+            equipo,
+            responsable,
+            tipo:tipoMantenimiento,
+            estado:estadoMantenimiento,
+            fechaInicio,
+            fechaFin
+        }
+
+        await crearMantenimiento(data)
+
+        alert("Mantenimiento creado con exito")
+
+        listarMantenimientos(tipo).then(setMantenimientos)
+    }
 
     const handleCrearOrden = async () => {
 
@@ -193,6 +233,10 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
         label:"Acciones",
         render: (m) => (
             <div className="flex gap-2">
+                <PrimaryButton 
+                text="Registrar Mantenimiento"
+                onClick={() => setMostrarFormularioMantenimiento(true)}
+                />
                 <PrimaryButton
                 text="Registrar Programacion"
                 onClick={() => setMantenimientoProgramar(m)}
@@ -219,7 +263,7 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                 />
                 <PrimaryButton
                 text="Reporte"
-                onClick={() => console.log("generar reporte",m.idMantenimiento)}
+                onClick={() => router.push("/reportes")}
                 />
             </div>
         )
@@ -233,15 +277,19 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                 <h2 className="text-xl font-semibold">
                     Mantenimientos {tipo}
                 </h2>
-                <ButtonGrid>
-                    <PrimaryButton text="Registrar mantenimiento" onClick={() => console.log("crear mantenimiento")}/>
-                </ButtonGrid>
             </div>
             <DataTable
             title="Lista de mantenimientos"
             data={mantenimientos}
             columns={columns}
             />
+           {mostrarFormularioMantenimiento && (
+             <Card>
+                <h3 className="text-lg font-semibold mb-4">
+                    Registrar Mantenimiento
+                </h3>
+            </Card>
+           )}
             {mantenimientoSeleccionado && (
              <Card>
                 <h3 className="text-lg font-semibold mb-4">

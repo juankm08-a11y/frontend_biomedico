@@ -15,7 +15,7 @@ export const generarReporte = async (
 
     const formData = new FormData()
 
-    if (data.equipo) formData.append("equipo",data.equipo.toString())
+    formData.append("mantenimiento",data.mantenimiento.toString())
 
     formData.append("nombre",data.nombre)
 
@@ -30,8 +30,13 @@ export const generarReporte = async (
     if (data.archivo)
         formData.append("archivo",data.archivo)
 
+    if (!data.mantenimiento || data.mantenimiento == 0){
+        alert("Seleccione un mantenimiento")
+        return 
+    } 
+    
     const response = await api.post(
-        "/reportes",
+        "/reportes/",
         formData,
         {
             headers: {

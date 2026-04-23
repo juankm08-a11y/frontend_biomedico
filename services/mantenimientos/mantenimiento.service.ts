@@ -10,7 +10,7 @@ export const listarMantenimientos = async (tipo?:string) : Promise<Mantenimiento
     return response.data
 }
 
-export const crearMantenimiento = async (data: MantenimientoResponse): Promise<MantenimientoResponse> => {
+export const crearMantenimiento = async (data: MantenimientoRequest): Promise<MantenimientoResponse> => {
     
     const response = await api.post("/mantenimientos/", data);
   
