@@ -10,6 +10,9 @@ export default function DashboardPage() {
             <button onClick={() => router.push("/mantenimientos/preventivos/")}>
                 Hola
             </button>
+            <button onClick={() => router.push("/equipos/")}>
+                Equipo
+            </button>
         </div>
     )
 }

@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { UsuarioResponse } from "@/types/usuarios/Usuario.type";
+import { UsuarioResponse } from "@/types/usuarios/usuario.type";
 
 export const consultarUsuarios = async (): Promise<UsuarioResponse[]> => {
   const response = await api.get("/usuarios/");

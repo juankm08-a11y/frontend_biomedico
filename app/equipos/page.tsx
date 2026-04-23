@@ -1,9 +1,9 @@
 "use client";
 
-import ListarFichasTecnicas from "@/components/equipos/consultar/ListarFichasTecnicas";
+import HojasVidaPage from "@/components/equipos/HojasVidaPage";
 
-export default function ConsultarHojasVidaEquiposPage() {
+export default function RegistrosPage() {
     return (
-        <ListarFichasTecnicas/>
+        <HojasVidaPage/>
     )
 }
