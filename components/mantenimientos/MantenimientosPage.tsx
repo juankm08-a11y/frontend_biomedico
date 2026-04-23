@@ -15,11 +15,11 @@ import { crearOrden, listarOrdenes } from "@/services/mantenimientos/ordenesServ
 import { ProgramacionMantenimientoRequest, ProgramacionMantenimientoResponse, UnidadFrecuencia } from "@/types/mantenimientos/programacionMantenimiento.type";
 import { consultarProgramacion, crearProgramacion } from "@/services/mantenimientos/programacionMantenimiento.service";
 import { api } from "@/lib/api";
-import { UsuarioResponse } from "@/types/usuarios/Usuario.type";
 import { consultarUsuarios } from "@/services/usuarios/usuario.service";
 import { crearCertificado } from "@/services/mantenimientos/certificados.service";
 import { useRouter } from "next/navigation";
-import { crearMantenimiento } from '../../services/mantenimientos/mantenimiento.service';
+import { crearMantenimiento, actualizarMantenimiento } from '../../services/mantenimientos/mantenimiento.service';
+import { UsuarioResponse } from "@/types/usuarios/usuario.type";
 
 export default function MantenimientosPage({tipo}:{tipo:string}) {
     const [mantenimientos,setMantenimientos] = useState<MantenimientoResponse[]>([])
@@ -31,7 +31,8 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
     const [mantenimientoProgramaciones,setMantenimientoProgramaciones] = useState<MantenimientoResponse | null>(null)
     const [mantenimientoCertificado, setMantenimientoCertificado] = useState<MantenimientoResponse | null>(null)
 
-    const [equipo,setEquipo] = useState<number>(0)
+    const [mantenimientoEditarId,setMantenimientoEditarId] = useState<number | null>(null)
+
     const [responsable,setResponsable] = useState<number>(0)
 
     const [tipoMantenimiento,setTipoMantenimiento] = useState<TipoMantenimiento>("preventivo")
@@ -57,6 +58,15 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
     const [programaciones,setProgramaciones] = useState<ProgramacionMantenimientoResponse[]>([])
 
     const [usuarios,setUsuarios] = useState<UsuarioResponse[]>([])
+
+    const [formMantenimiento,setFormMantenimiento] = useState<MantenimientoRequest>({
+        equipo:0,
+        tipo:"preventivo",
+        fechaInicio:"",
+        fechaFin:"",
+        estado:"pendiente",
+        responsable:0
+    })
 
     const router = useRouter()
 
@@ -93,20 +103,14 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
 
         e.preventDefault()
 
-        if (!equipo || !responsable) {
+        const mantenimientoData = formMantenimiento
+
+        if (mantenimientoData.equipo === 0 || mantenimientoData.responsable === 0) {
             alert("Seleccione el equipo y responsable")
+            return
         }
 
-        const data:MantenimientoRequest = {
-            equipo,
-            responsable,
-            tipo:tipoMantenimiento,
-            estado:estadoMantenimiento,
-            fechaInicio,
-            fechaFin
-        }
-
-        await crearMantenimiento(data)
+        await crearMantenimiento(mantenimientoData)
 
         alert("Mantenimiento creado con exito")
 
@@ -148,6 +152,27 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
             setOrdenes(filtradas)
         })
     }, [mantenimientoOrdenes])
+
+    useEffect(() => {
+        if (!mantenimientoEditarId) return 
+
+        const cargar = async () => {
+            const res = await api.get(`/mantenimientos/${mantenimientoEditarId}/`)
+
+            const data = res.data 
+
+            setFormMantenimiento({
+                equipo:data.euipo,
+                tipo:data.tipo,
+                fechaInicio:data.fechaInicio,
+                fechaFin:data.fechaFin,
+                estado:data.estado,
+                responsable:data.responsable
+            })
+        }
+
+        cargar()
+    }, [mantenimientoEditarId])
 
     useEffect(() => {
         if (!mantenimientoProgramaciones) return 
@@ -237,6 +262,21 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                 text="Registrar Mantenimiento"
                 onClick={() => setMostrarFormularioMantenimiento(true)}
                 />
+                <PrimaryButton 
+                text="Actualizar Mantenimiento"
+                onClick={() => {
+                    setMantenimientoEditarId(m.idMantenimiento)
+                    setFormMantenimiento({
+                        equipo:m.equipo,
+                        tipo:m.tipo,
+                        fechaInicio:m.fechaInicio,
+                        fechaFin:m.fechaFin,
+                        responsable:m.responsable,
+                        estado:m.estado
+                    })
+                    }
+                }
+                />
                 <PrimaryButton
                 text="Registrar Programacion"
                 onClick={() => setMantenimientoProgramar(m)}
@@ -288,6 +328,123 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                 <h3 className="text-lg font-semibold mb-4">
                     Registrar Mantenimiento
                 </h3>
+
+                <form onSubmit={handleCrearMantenimiento}>
+                    <select value={formMantenimiento.equipo}
+                    onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        equipo:Number(e.target.value)
+                    })}>
+                        <option value={0}>
+                            Seleccione equipo
+                        </option>
+                        {equipos.map((e) => (
+                            <option key={e.idEquipo} value={e.idEquipo}>
+                                {e.nombre}
+                            </option>
+                        ) )}
+                    </select>
+                    <select value={formMantenimiento.tipo} onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        tipo:e.target.value as TipoMantenimiento
+                    })}>
+                        <option value="preventivo">
+                            Preventivo
+                        </option>
+                        <option value="correctivo">
+                            Correctivo
+                        </option>
+                    </select>
+                     <input type="date" value={formMantenimiento.fechaInicio} onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        fechaInicio:e.target.value
+                    })} />
+                    <input type="date" value={formMantenimiento.fechaFin} onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        fechaFin:e.target.value
+                    })} />
+                    <select value={formMantenimiento.responsable} onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        responsable:Number(e.target.value)
+                    })}>
+                        <option value={0}>Seleccione responsable</option>
+                        {usuarios.map((u) => (
+                            <option key={u.id} value={u.id}>
+                                {u.nombre}
+                            </option>
+                        ))}
+                    </select>
+                    <button type="submit">
+                        Guardar
+                    </button>
+                </form>
+            </Card>
+           )}
+           {mantenimientoEditarId && (
+            <Card>
+                <h3>Actualizar mantenimiento</h3>
+
+                <form onSubmit={async (e) => {
+                    e.preventDefault()
+
+                    await actualizarMantenimiento(
+                        mantenimientoEditarId,
+                        formMantenimiento
+                    )
+
+                    const res = await api.get("/mantenimientos/")
+                    setMantenimientos(res.data)
+
+                    setMantenimientoEditarId(null)
+                }}>
+                    <select value={formMantenimiento.equipo}
+                    onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        equipo:Number(e.target.value)
+                    })}>
+                        <option value={0}>
+                            Seleccione equipo
+                        </option>
+                        {equipos.map((e) => (
+                            <option key={e.idEquipo} value={e.idEquipo}>
+                                {e.nombre}
+                            </option>
+                        ) )}
+                    </select>
+                    <select value={formMantenimiento.tipo} onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        tipo:e.target.value as TipoMantenimiento
+                    })}>
+                        <option value="preventivo">
+                            Preventivo
+                        </option>
+                        <option value="correctivo">
+                            Correctivo
+                        </option>
+                    </select>
+                     <input type="date" value={formMantenimiento.fechaInicio} onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        fechaInicio:e.target.value
+                    })} />
+                    <input type="date" value={formMantenimiento.fechaFin} onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        fechaFin:e.target.value
+                    })} />
+                    <select value={formMantenimiento.responsable} onChange={(e) => setFormMantenimiento({
+                        ...formMantenimiento,
+                        responsable:Number(e.target.value)
+                    })}>
+                        <option value={0}>Seleccione responsable</option>
+                        {usuarios.map((u) => (
+                            <option key={u.id} value={u.id}>
+                                {u.nombre}
+                            </option>
+                        ))}
+                    </select>
+                    <button type="submit">
+                        Actualizar
+                    </button>
+                </form>
             </Card>
            )}
             {mantenimientoSeleccionado && (

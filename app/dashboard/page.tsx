@@ -8,7 +8,7 @@ export default function DashboardPage() {
             Bienvenido al Dashboard
             {/*<RegistroHojaVidaEquipoPage/>*/ } 
             <button onClick={() => router.push("/mantenimientos/preventivos/")}>
-                Hola
+                Mantenimientos
             </button>
             <button onClick={() => router.push("/equipos/")}>
                 Equipo

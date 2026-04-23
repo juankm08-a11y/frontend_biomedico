@@ -20,7 +20,7 @@ export const crearMantenimiento = async (data: MantenimientoRequest): Promise<Ma
 
 export const actualizarMantenimiento = async (idMantenimiento:number,data:MantenimientoRequest): Promise<MantenimientoResponse> => {
 
-    const response = await api.put(`/mantenimientos/${idMantenimiento}/aprobar`)
+    const response = await api.put(`/mantenimientos/${idMantenimiento}/`,data)
     
     return response.data
 }
