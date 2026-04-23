@@ -5,12 +5,12 @@ import { UseForm } from "@/hooks/useForm";
 import { useHandle } from "@/hooks/useHandle";
 import PageContainer from "../../ui/layout/PageContainer";
 import { useRouter } from "next/navigation";
-import { equipoToForm } from "@/mappers/equipo.mapper";
-import { crearEquipo } from "@/services/equipo.service";
+import { equipoToForm } from "@/mappers/equipos/equipo.mapper";
+import { crearEquipo } from "@/services/equipos/equipo.service";
 import InputField from "../../ui/input/InputField";
 import SelectField, { Option } from "../../ui/input/SelectField";
 import { useEffect, useState } from "react";
-import { EquipoRequest } from "@/types/Equipo.type";
+import { EquipoRequest } from "@/types/equipos/equipo.type";
 
 export default function FormularioRegistroEquipo() {
     const router = useRouter();

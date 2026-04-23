@@ -1,6 +1,6 @@
 "use client"
 import PageContainer from "@/components/ui/layout/PageContainer";
-import { eliminarEquipo, obtenerEquipo } from "@/services/equipo.service";
+import { eliminarEquipo, obtenerEquipo } from "@/services/equipos/equipo.service";
 import {  useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

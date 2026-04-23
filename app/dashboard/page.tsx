@@ -7,7 +7,7 @@ export default function DashboardPage() {
         <div>
             Bienvenido al Dashboard
             {/*<RegistroHojaVidaEquipoPage/>*/ } 
-            <button onClick={() => router.push("/equipos/")}>
+            <button onClick={() => router.push("/mantenimientos/preventivos/")}>
                 Hola
             </button>
         </div>
