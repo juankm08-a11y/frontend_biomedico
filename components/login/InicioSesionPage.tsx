@@ -28,17 +28,23 @@ export default function InicioSesionPage() {
     const handleSubmit = (e:any) => {
         e.preventDefault()
 
-        handle(async () => {
-            const response = await login(formData)
-            console.log(response)
+         handle(async () => {
+         const response = await login(formData)
 
-            localStorage.setItem("usuario",response.usuario)
-            localStorage.setItem("rol",response.rol)
+         console.log(localStorage.getItem("rol"))
+         localStorage.setItem("access",response.access)
+         localStorage.setItem("refresh",response.refresh)
+         localStorage.setItem("rol",response.rol)
+         localStorage.setItem("usuario",response.usuario)
 
-            document.cookie = `rol=${response.rol}; path=/`
 
-            router.push("/dashboard");
-        })
+         document.cookie = `access=${response.access}; path=/`
+         document.cookie = `rol=${response.rol}; path=/`
+
+         setTimeout(() => {
+            router.push("/dashboard")
+         }, 100)
+     })
     }
 
     const actions = [

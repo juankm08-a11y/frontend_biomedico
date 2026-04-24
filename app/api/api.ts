@@ -10,6 +10,8 @@ api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("access");
 
+    console.log("TOKEN EN REQUEST:", token); 
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -17,17 +19,6 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      console.error("No autorizado. Token inválido o expirado.");
-    }
-
-    return Promise.reject(error);
-  },
-);
 
 api.interceptors.response.use(
   (response) => response,
