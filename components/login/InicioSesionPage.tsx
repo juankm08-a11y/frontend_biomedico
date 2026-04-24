@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/router";
 import { UseForm } from '../../hooks/useForm';
 import { LoginRequest } from "@/types/auth/login.type";
 import { useAction } from "@/hooks/useAction";
@@ -11,6 +10,7 @@ import AuthLayout from "../ui/layout/AuthLayout";
 import AuthForm from "../ui/form/AuthForm";
 import InputField from "../ui/input/InputField";
 import PrimaryButton from "../ui/button/PrimaryButton";
+import { useRouter } from 'next/navigation';
 
 export default function InicioSesionPage() {
     const router = useRouter()
@@ -30,6 +30,7 @@ export default function InicioSesionPage() {
 
         handle(async () => {
             const response = await login(formData)
+            console.log(response)
 
             localStorage.setItem("usuario",response.usuario)
             localStorage.setItem("rol",response.rol)
