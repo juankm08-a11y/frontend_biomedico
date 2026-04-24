@@ -6,7 +6,7 @@ import InputField from "@/components/ui/input/InputField";
 import SelectField from "@/components/ui/input/SelectField";
 import PageContainer from "@/components/ui/layout/PageContainer";
 import { useError } from "@/hooks/useError";
-import { registerUsuario } from "@/services/auth/auth.service";
+import { registerUsuario } from "@/services/auth/register.service";
 import { RegisterRequest } from "@/types/auth/register.type";
 import { useState } from "react";
 
