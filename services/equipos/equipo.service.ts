@@ -5,8 +5,13 @@ import { EquipoRequest, EquipoResponse } from "@/types/equipos/equipo.type";
 export const crearEquipo = async (
   data: EquipoRequest,
 ): Promise<EquipoResponse> => {
-  const res = await api.post("/equipos/", data);
-  return res.data;
+    try {
+      const res = await api.post("/equipos/", data);
+      return res.data;
+    } catch (error:any) {
+      console.log("Error BACKEND:",error?.response.data)
+      throw error;
+    }
 };
 
 export const listarEquipos = async (): Promise<EquipoResponse[]> => {
@@ -25,8 +30,13 @@ export const actualizarEquipo = async (
   idEquipo: number,
   data: EquipoRequest,
 ): Promise<EquipoResponse> => {
-  const res = await api.put(`/equipos/${idEquipo}/`, data);
-  return res.data;
+  try {
+     const res = await api.put(`/equipos/${idEquipo}/`, data);
+    return res.data;
+  } catch (error: any) {
+    console.log("RESPUESTA BACK:",error?.response.data);
+    throw error;
+  }
 };
 
 export const eliminarEquipo = async (idEquipo: number) => {

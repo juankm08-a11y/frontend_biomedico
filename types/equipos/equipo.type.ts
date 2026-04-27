@@ -3,8 +3,7 @@ export interface EquipoRequest {
     marca:number;
     modelo:number;
     serie:string;
-    fabricante:number;
-    tipoTecnologia:number;
+    tipo_tecnologia:string;
     ubicacion:number;
     placa:string;
 }
@@ -15,8 +14,7 @@ export interface EquipoResponse {
     marca:number
     modelo:number
     serie:string
-    fabricante:number
-    tipoTecnologia:number
+    tipo_tecnologia:string
     ubicacion:number
     fechaRegistro:string
     placa:string

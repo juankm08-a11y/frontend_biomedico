@@ -5,13 +5,13 @@ export type UnidadFrecuencia =
 
 export interface ProgramacionMantenimientoRequest {
 
-    equipo: number 
+    equipo_id: number 
 
-    unidadFrecuencia: UnidadFrecuencia
+    unidad_frecuencia: UnidadFrecuencia
 
-    frecuenciaMantenimiento: number 
+    frecuencia_mantenimiento: number 
 
-    frecuenciaCalibracion: number 
+    frecuencia_calibracion: number 
 
    
 }
@@ -20,17 +20,17 @@ export interface ProgramacionMantenimientoResponse {
 
     idProgramacion: number 
 
-    equipo: number 
+    equipo_id: number 
 
     mantenimiento: number 
 
-    unidadFrecuencia: UnidadFrecuencia
+    unidad_frecuencia: UnidadFrecuencia
 
-    frecuenciaMantenimiento: number 
+    frecuencia_mantenimiento: number 
 
-    frecuenciaCalibracion: number 
+    frecuencia_calibracion: number 
 
-    proximoMantenimiento: string 
+    proximo_mantenimiento: string 
 
-    proximoCalibracion: string 
+    proximo_calibracion: string 
 }

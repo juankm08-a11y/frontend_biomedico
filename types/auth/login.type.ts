@@ -7,4 +7,6 @@ export interface LoginResponse {
     message:string;
     password:string;
     rol:string;
+    access:string;
+    refresh:string;
 }

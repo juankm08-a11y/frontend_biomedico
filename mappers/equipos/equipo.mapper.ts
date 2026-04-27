@@ -7,8 +7,7 @@ export function equipoToForm(data? : Partial<EquipoResponse>):EquipoRequest {
         modelo: data?.modelo ?? 0,
         serie: data?.serie ?? "",
         placa: data?.placa ?? "",
-        fabricante: data?.fabricante ?? 0,
-        tipoTecnologia: data?.tipoTecnologia ?? 0,
+        tipo_tecnologia: data?.tipo_tecnologia ?? "",
         ubicacion: data?.ubicacion ?? 0,
     }
 }

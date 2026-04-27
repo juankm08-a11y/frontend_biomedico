@@ -81,8 +81,8 @@ export default function ConsultarReportesPage() {
                         <select value={mantenimiento} onChange={(e) => setMantenimiento(Number(e.target.value))}>
                             <option value={0}>Seleccione</option>
                             {mantenimientos.map(m => (
-                                <option key={m.idMantenimiento} value={m.idMantenimiento}>
-                                    {m.idMantenimiento} - {m.tipo}
+                                <option key={m.id} value={m.id}>
+                                    {m.id} - {m.tipo}
                                 </option>
                             ))}
                         </select>

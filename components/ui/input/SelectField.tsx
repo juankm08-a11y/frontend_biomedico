@@ -30,9 +30,9 @@ export default function SelectField({
                 <option value="">
                     Seleccione {label.toLowerCase()}
                 </option>
-                {options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                        {option.label}
+                {options.map((option,index) => (
+                    <option key={option.value ?? index} value={option.value}>
+                        {option.label ?? "Sin nombre"}
                     </option>
                 ))}
             </select>

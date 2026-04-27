@@ -13,13 +13,14 @@ import { listarEquipos } from "@/services/equipos/equipo.service";
 import { EstadoOrden, OrdenServicioRequest, OrdenServicioResponse } from "@/types/mantenimientos/ordenServicio.type";
 import { crearOrden, listarOrdenes } from "@/services/mantenimientos/ordenesServicio.service";
 import { ProgramacionMantenimientoRequest, ProgramacionMantenimientoResponse, UnidadFrecuencia } from "@/types/mantenimientos/programacionMantenimiento.type";
-import { consultarProgramacion, crearProgramacion } from "@/services/mantenimientos/programacionMantenimiento.service";
+import { consultarProgramacion, crearProgramacion, listarProgramaciones } from "@/services/mantenimientos/programacionMantenimiento.service";
 import { api } from "@/lib/api";
 import { consultarUsuarios } from "@/services/usuarios/usuario.service";
-import { crearCertificado } from "@/services/mantenimientos/certificados.service";
+import { crearCertificado, listarCertificados } from "@/services/mantenimientos/certificados.service";
 import { useRouter } from "next/navigation";
 import { crearMantenimiento, actualizarMantenimiento } from '../../services/mantenimientos/mantenimiento.service';
 import { UsuarioResponse } from "@/types/usuarios/usuario.type";
+import { CertificadoMetrologicoResponse } from "@/types/mantenimientos/certificadoMetrologico.type";
 
 export default function MantenimientosPage({tipo}:{tipo:string}) {
     const [mantenimientos,setMantenimientos] = useState<MantenimientoResponse[]>([])
@@ -30,6 +31,7 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
     const [mantenimientoProgramar,setMantenimientoProgramar] = useState<MantenimientoResponse | null>(null)
     const [mantenimientoProgramaciones,setMantenimientoProgramaciones] = useState<MantenimientoResponse | null>(null)
     const [mantenimientoCertificado, setMantenimientoCertificado] = useState<MantenimientoResponse | null>(null)
+    const [certificados,setCertificados] = useState<CertificadoMetrologicoResponse[]>([]);
 
     const [mantenimientoEditarId,setMantenimientoEditarId] = useState<number | null>(null)
 
@@ -60,17 +62,31 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
     const [usuarios,setUsuarios] = useState<UsuarioResponse[]>([])
 
     const [formMantenimiento,setFormMantenimiento] = useState<MantenimientoRequest>({
-        equipo:0,
+        equipo_id:0,
         tipo:"preventivo",
-        fechaInicio:"",
-        fechaFin:"",
+        fecha_inicio:"",
+        fecha_fin:"",
         estado:"pendiente",
-        responsable:0
+        responsable_id:0,
+        diagnostico:""
     })
+
+    const [formProgramacion,setFormProgramacion] = useState<ProgramacionMantenimientoRequest>({
+        equipo_id:0,
+        unidad_frecuencia:"meses",
+        frecuencia_mantenimiento:1,
+        frecuencia_calibracion:1,
+    });
 
     const router = useRouter()
 
     useEffect(() => {
+        const token = localStorage.getItem("access");
+
+        if (!token) {
+            console.warn("No hay token disponible");
+            return 
+        }
 
         listarMantenimientos(tipo)
         .then((data) => {
@@ -105,16 +121,27 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
 
         const mantenimientoData = formMantenimiento
 
-        if (mantenimientoData.equipo === 0 || mantenimientoData.responsable === 0) {
+        if (mantenimientoData.equipo_id === 0 || mantenimientoData.responsable_id === 0) {
             alert("Seleccione el equipo y responsable")
             return
         }
 
-        await crearMantenimiento(mantenimientoData)
+        await crearMantenimiento({
+                diagnostico: mantenimientoData.diagnostico,
+                tipo: mantenimientoData.tipo,
 
-        alert("Mantenimiento creado con exito")
+                estado: mantenimientoData.estado,
 
-        listarMantenimientos(tipo).then(setMantenimientos)
+                equipo_id: mantenimientoData.equipo_id,
+                responsable_id: mantenimientoData.responsable_id,
+
+                fecha_inicio: mantenimientoData.fecha_inicio,
+                fecha_fin: mantenimientoData.fecha_fin
+            })
+
+            alert("Mantenimiento creado con exito")
+
+            listarMantenimientos(tipo).then(setMantenimientos)
     }
 
     const handleCrearOrden = async () => {
@@ -122,13 +149,19 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
         if (!mantenimientoOrden) return 
 
         const data:OrdenServicioRequest = {
-            mantenimiento:mantenimientoOrden.idMantenimiento,
-            tipoServicio,
-            descripcion,
-            estado
+            mantenimiento:mantenimientoOrden.id,
+            tipoServicio:tipoServicio,
+            descripcion:descripcion,
+            estado:estado
         }
 
-        await crearOrden(data)
+  
+        const res = await crearOrden(data)
+
+
+        alert("Orden creada correctamente");
+
+        setMantenimientoOrden(null)
     }
 
     const handleEstadoChange = (value:string) => {
@@ -146,8 +179,10 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
         if (!mantenimientoOrdenes) return 
 
         listarOrdenes().then((data) => {
+            console.log("DATA: ",data)
+            console.log("ORDENES: ",ordenes)
             const filtradas = data.filter(
-                (o) => o.mantenimiento === mantenimientoOrdenes.idMantenimiento
+                (o) => o.mantenimiento === mantenimientoOrdenes.id
             )
             setOrdenes(filtradas)
         })
@@ -162,12 +197,13 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
             const data = res.data 
 
             setFormMantenimiento({
-                equipo:data.euipo,
+                equipo_id:data.equipo_id,
                 tipo:data.tipo,
-                fechaInicio:data.fechaInicio,
-                fechaFin:data.fechaFin,
+                fecha_inicio:data.fecha_inicio,
+                fecha_fin:data.fecha_fin,
                 estado:data.estado,
-                responsable:data.responsable
+                responsable_id:data.responsable,
+                diagnostico:data.diagnostico
             })
         }
 
@@ -175,34 +211,71 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
     }, [mantenimientoEditarId])
 
     useEffect(() => {
-        if (!mantenimientoProgramaciones) return 
+        if (!mantenimientoProgramaciones) {
+            setProgramaciones([])
+            return
+        } 
 
-        api.get("/programaciones/")
-        .then((res) => {
-            const filtradas = res.data.filter(
-                (p:ProgramacionMantenimientoResponse) => 
-                    p.equipo === mantenimientoProgramaciones.equipo
+        listarProgramaciones()
+        .then((data) => {
+            const filtradas = data.filter(
+                (p) => p.equipo_id === mantenimientoProgramaciones.equipo_id
             )
 
             setProgramaciones(filtradas)
         })
     },[mantenimientoProgramaciones])
 
+    useEffect(() => {
+        if (!mantenimientoCertificado) {
+            setCertificados([])
+            return 
+        }
+
+        listarCertificados().then((data) => {
+            const filtrados = data.filter(
+                (c) => c.mantenimiento === mantenimientoCertificado.id
+            )
+
+            setCertificados(filtrados)
+        })
+    },[mantenimientoCertificado])
+
     const handleCrearProgramacion = async (e:any) => {
 
         e.preventDefault()
 
-        if (!mantenimientoProgramar) return 
-
-        const data:ProgramacionMantenimientoRequest = {
-            equipo: mantenimientoProgramar.equipo,
-            unidadFrecuencia,
-            frecuenciaMantenimiento,
-            frecuenciaCalibracion,
-            
+        if (!formProgramacion.equipo_id || formProgramacion.equipo_id === 0) {
+        alert("ERROR: equipo_id inválido")
+        return
         }
 
+        const data:ProgramacionMantenimientoRequest = {
+            equipo_id: formProgramacion.equipo_id,
+            unidad_frecuencia: unidadFrecuencia,
+            frecuencia_mantenimiento: frecuenciaMantenimiento,
+            frecuencia_calibracion:frecuenciaCalibracion,
+            
+        }
+        
         await crearProgramacion(data)
+
+        alert("Programación creada exitosamente");
+
+        setFormProgramacion({
+            equipo_id:0,
+            unidad_frecuencia:"meses",
+            frecuencia_mantenimiento:1,
+            frecuencia_calibracion:1
+        })
+
+        setUnidadFrecuencia("meses")
+        setFrecuenciaMantenimiento(1)
+        setFrecuenciaCalibracion(1)
+
+        setMantenimientoProgramar(null)
+        setMantenimientoProgramaciones(null)
+        setProgramaciones([])
     }
 
     const handleCrearCertificado = async (e:any) => {
@@ -215,43 +288,61 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
 
             numeroCertificado,
             responsable:responsableCertificado,
-            mantenimiento:mantenimientoCertificado.idMantenimiento
+            mantenimiento:mantenimientoCertificado.id
         
         
         }
-        await crearCertificado(data)
+        try {
+            const res = await crearCertificado(data)
+
+            console.log("CERTIFICADO CREADO:", res)
+
+            alert("Certificado creado correctamente")
+
+        } catch (error:any) {
+
+        console.error("ERROR BACKEND:", error.response?.data || error)
+
+        alert(
+            error.response?.data?.error ||
+            JSON.stringify(error.response?.data?.errors) ||
+        "Error al crear certificado"
+        )
+    }
     }
 
     const columns: Column<MantenimientoResponse>[] = [
     {
-      key: "equipo",
+      key: "equipo_id",
       label: "Equipo",
       render: (m) => {
         const equipo = equipos?.find(
-          (e) => e.idEquipo === m.equipo
+          (e) => e.idEquipo === m.equipo_id
         )
         return equipo?.nombre?? "__"
       }
     },
     {
-      key: "tipo",
-      label: "Tipo",
+    key: "tipo_display",
+    label: "Tipo",
     },
     {
-      key: "estado",
-      label: "Estado",
+    key: "estado_display",
+    label: "Estado",
     },
     {
-      key: "fechaInicio",
-      label: "Fecha Inicio",
+    key: "fechaInicio",
+    label: "Fecha Inicio",
+    render: (m) => m.fechaInicio?.split("T")[0]
     },
     {
-      key: "fechaFin",
-      label: "Fecha Fin",
+    key: "fechaFin",
+    label: "Fecha Fin",
+    render: (m) => m.fechaFin?.split("T")[0]
     },
     {
-      key: "responsable",
-      label: "Responsable",
+    key: "responsable_nombre",
+    label: "Responsable",
     },
     {
         key:"actions",
@@ -265,21 +356,31 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                 <PrimaryButton 
                 text="Actualizar Mantenimiento"
                 onClick={() => {
-                    setMantenimientoEditarId(m.idMantenimiento)
+                    setMantenimientoEditarId(m.id)
                     setFormMantenimiento({
-                        equipo:m.equipo,
+                        equipo_id:m.equipo_id,
                         tipo:m.tipo,
-                        fechaInicio:m.fechaInicio,
-                        fechaFin:m.fechaFin,
-                        responsable:m.responsable,
-                        estado:m.estado
+                        fecha_inicio:m.fechaInicio,
+                        fecha_fin:m.fechaFin,
+                        responsable_id:m.responsable_id,
+                        estado:m.estado,
+                        diagnostico:m.diagnostico
                     })
                     }
                 }
                 />
                 <PrimaryButton
                 text="Registrar Programacion"
-                onClick={() => setMantenimientoProgramar(m)}
+                onClick={() => {
+                    setMantenimientoProgramar(m)
+
+                    setFormProgramacion({
+                        equipo_id:m.equipo_id,
+                        unidad_frecuencia:"meses",
+                        frecuencia_mantenimiento:1,
+                        frecuencia_calibracion:1,
+                    })
+                }}
                 />
                 <PrimaryButton
                 text="Ver programaciones"
@@ -328,12 +429,12 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                 <h3 className="text-lg font-semibold mb-4">
                     Registrar Mantenimiento
                 </h3>
-
-                <form onSubmit={handleCrearMantenimiento}>
-                    <select value={formMantenimiento.equipo}
+                <form onSubmit={handleCrearMantenimiento} className="w-full border shadow bg-white mt-6">
+                    <div className="grid grid-cols-4 gap-3 p-4">
+                        <select value={formMantenimiento.equipo_id}
                     onChange={(e) => setFormMantenimiento({
                         ...formMantenimiento,
-                        equipo:Number(e.target.value)
+                        equipo_id:Number(e.target.value)
                     })}>
                         <option value={0}>
                             Seleccione equipo
@@ -355,17 +456,23 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                             Correctivo
                         </option>
                     </select>
-                     <input type="date" value={formMantenimiento.fechaInicio} onChange={(e) => setFormMantenimiento({
+                     <input type="date" value={formMantenimiento.fecha_inicio} onChange={(e) => setFormMantenimiento({
                         ...formMantenimiento,
-                        fechaInicio:e.target.value
+                        fecha_inicio:e.target.value
                     })} />
-                    <input type="date" value={formMantenimiento.fechaFin} onChange={(e) => setFormMantenimiento({
+                    <input type="date" value={formMantenimiento.fecha_fin} onChange={(e) => setFormMantenimiento({
                         ...formMantenimiento,
-                        fechaFin:e.target.value
+                        fecha_fin:e.target.value
                     })} />
-                    <select value={formMantenimiento.responsable} onChange={(e) => setFormMantenimiento({
+                    <textarea placeholder="Diagnóstico" value={formMantenimiento.diagnostico} onChange={(e) =>
+                        setFormMantenimiento({
+                            ...formMantenimiento,
+                            diagnostico: e.target.value,
+                        })
+                    }/>
+                    <select value={formMantenimiento.responsable_id} onChange={(e) => setFormMantenimiento({
                         ...formMantenimiento,
-                        responsable:Number(e.target.value)
+                        responsable_id:Number(e.target.value)
                     })}>
                         <option value={0}>Seleccione responsable</option>
                         {usuarios.map((u) => (
@@ -377,6 +484,7 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                     <button type="submit">
                         Guardar
                     </button>
+                    </div>
                 </form>
             </Card>
            )}
@@ -386,21 +494,13 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
 
                 <form onSubmit={async (e) => {
                     e.preventDefault()
-
-                    await actualizarMantenimiento(
-                        mantenimientoEditarId,
-                        formMantenimiento
-                    )
-
-                    const res = await api.get("/mantenimientos/")
-                    setMantenimientos(res.data)
-
+                    listarMantenimientos(tipo).then(setMantenimientos);
                     setMantenimientoEditarId(null)
                 }}>
-                    <select value={formMantenimiento.equipo}
+                    <select value={formMantenimiento.equipo_id}
                     onChange={(e) => setFormMantenimiento({
                         ...formMantenimiento,
-                        equipo:Number(e.target.value)
+                        equipo_id:Number(e.target.value)
                     })}>
                         <option value={0}>
                             Seleccione equipo
@@ -422,17 +522,23 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                             Correctivo
                         </option>
                     </select>
-                     <input type="date" value={formMantenimiento.fechaInicio} onChange={(e) => setFormMantenimiento({
+                     <input type="date" value={formMantenimiento.fecha_inicio} onChange={(e) => setFormMantenimiento({
                         ...formMantenimiento,
-                        fechaInicio:e.target.value
+                        fecha_inicio:e.target.value
                     })} />
-                    <input type="date" value={formMantenimiento.fechaFin} onChange={(e) => setFormMantenimiento({
+                    <input type="date" value={formMantenimiento.fecha_fin} onChange={(e) => setFormMantenimiento({
                         ...formMantenimiento,
-                        fechaFin:e.target.value
+                        fecha_fin:e.target.value
                     })} />
-                    <select value={formMantenimiento.responsable} onChange={(e) => setFormMantenimiento({
+                    <textarea placeholder="Diagnóstico" value={formMantenimiento.diagnostico} onChange={(e) =>
+                        setFormMantenimiento({
+                            ...formMantenimiento,
+                            diagnostico: e.target.value,
+                        })
+                    }/>
+                    <select value={formMantenimiento.responsable_id} onChange={(e) => setFormMantenimiento({
                         ...formMantenimiento,
-                        responsable:Number(e.target.value)
+                        responsable_id:Number(e.target.value)
                     })}>
                         <option value={0}>Seleccione responsable</option>
                         {usuarios.map((u) => (
@@ -475,7 +581,7 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                             <td>
                                 {
                                 equipos.find(
-                                    e=>e.idEquipo === mantenimientoSeleccionado.equipo
+                                    e=>e.idEquipo === mantenimientoSeleccionado.equipo_id
                                 )?.nombre}
                             </td>
                             <td>
@@ -595,6 +701,12 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
 
                     <form onSubmit={handleCrearProgramacion}>
                         <div>
+                            <input placeholder="equipo id" type="number" value={formProgramacion.equipo_id} onChange={(e) => 
+                                setFormProgramacion({
+                                    ...formProgramacion,
+                                    equipo_id: Number(e.target.value)
+                                })
+                            } />
                             <label>Unidad de Frecuencia</label>
                             <select value={unidadFrecuencia} onChange={(e) => setUnidadFrecuencia(e.target.value as UnidadFrecuencia)}>
                                 <option value="dias">Días</option>
@@ -634,24 +746,30 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                             {programaciones.map((p) => (
                                 <tr key={p.idProgramacion} className="border-t">
                                     <td>
-                                        {p.unidadFrecuencia}
+                                        {p.unidad_frecuencia}
                                     </td>
                                     <td>
-                                        {p.unidadFrecuencia}
+                                        {p.frecuencia_mantenimiento}
                                     </td>
                                     <td>
-                                        {p.frecuenciaMantenimiento}
+                                        {p.frecuencia_calibracion}
                                     </td>
                                     <td>
-                                        {p.proximoMantenimiento}
+                                        {p.proximo_mantenimiento}
                                     </td>
                                     <td>
-                                        {p.proximoCalibracion}
+                                        {p.proximo_calibracion}
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                    <button onClick={() => {
+                        setMantenimientoProgramaciones(null)
+                        setProgramaciones([])
+                    }}>
+                        Cerrar
+                    </button>
                 </Card>
             )}
             {mantenimientoCertificado && (
@@ -688,6 +806,47 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
                             <PrimaryButton type="submit" text="Generar Certificado"/>
                         </ButtonGrid>
                     </form>
+                </Card>
+            )}
+            {mantenimientoCertificado && (
+                <Card>
+                    <h3 className="text-lg font-semibold mb-4">
+                        Certificados del mantenimiento
+                    </h3>
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Número</th>
+                                <th>Responsable</th>
+                                <th>Mantenimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {certificados.map((c) => (
+                                <tr key={c.idCertificado}>
+                                    <td>
+                                        {c.idCertificado}
+                                    </td>
+                                    <td>
+                                        {c.numeroCertificado}
+                                    </td>
+                                    <td>
+                                        {c.responsable}
+                                    </td>
+                                    <td>
+                                        {c.mantenimiento}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <button onClick={() => {
+                        setMantenimientoCertificado(null)
+                        setCertificados([])
+                    }}>
+                        Cerrar
+                    </button>
                 </Card>
             )}
         </Card>

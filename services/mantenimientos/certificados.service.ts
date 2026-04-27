@@ -5,17 +5,33 @@ export const crearCertificado = async (
     data:CertificadoMetrologicoRequest
 ): Promise<CertificadoMetrologicoResponse> => {
 
-    const response = await api.post("/certificados/",data)
+    const payload = {
+        numero_certificado: data.numeroCertificado,
+        responsable: data.responsable,
+        mantenimiento:data.mantenimiento
+    }
 
-    return response.data
+    const response = await api.post("/certificados/",payload)
+
+    return {
+        idCertificado: response.data.idCertificado ?? response.data.id,
+        numeroCertificado: response.data.numero_certificado,
+        responsable: response.data.responsable,
+        mantenimiento: response.data.mantenimiento
+    }
 }
 
 export const listarCertificados = async () : Promise<CertificadoMetrologicoResponse[]> => {
     const response = await api.get("/certificados/")
 
-    console.log("RESPONSE:",response.data)
+    const data = response.data.results || response.data 
 
-    return response.data
+    return data.map((c:any) => ({
+        idCertificado: c.idCertificado ?? c.id,
+        numeroCertificado: c.numero_certificado,
+        responsable:c.responsable,
+        mantenimiento:c.mantenimiento
+    }))
 }
 
 export const consultarCertificado = async (
@@ -24,5 +40,12 @@ export const consultarCertificado = async (
     
     const response = await api.get(`/certificados/${idCertificado}/`)
 
-    return response.data
+    const c = response.data 
+
+    return {
+        idCertificado: c.idCertificado ?? c.id,
+        numeroCertificado: c.numero_certificado,
+        responsable: c.responsable,
+        mantenimiento: c.mantenimiento
+    }
 }

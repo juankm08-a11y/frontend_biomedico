@@ -1,50 +1,52 @@
-export type TipoMantenimiento =
-    | "preventivo"
-    | "correctivo"
-    | "calibracion"
-    | "falla"
-    | "sistema"
 
-export type EstadoMantenimiento = 
-    | "pendiente"
-    | "aprobado"
-    | "supervisado"
-    | "ejecutado"
+export type TipoMantenimiento =
+  | "preventivo"
+  | "correctivo"
+  | "calibracion"
+  | "falla"
+  | "sistema"
+
+export type EstadoMantenimiento =
+  | "pendiente"
+  | "en_proceso"     
+  | "completado"     
+  | "aprobado"
+  | "supervisado"
+  | "ejecutado"
 
 
 
 export interface MantenimientoRequest {
+  equipo_id: number
+  tipo: TipoMantenimiento
 
-    equipo:number
+  fecha_inicio: string 
+  fecha_fin: string
 
-    tipo: TipoMantenimiento
+  estado: EstadoMantenimiento
+  responsable_id: number,
 
-    fechaInicio:string
-
-    fechaFin:string 
-
-    estado: EstadoMantenimiento
-
-    responsable:number 
+  diagnostico:string
 }
+
 
 export interface MantenimientoResponse {
+  id: number
 
-    idMantenimiento:number 
+  equipo_id: number
+  responsable_id: number
 
-    equipo:number 
+  equipo_nombre: string
+  responsable_nombre: string
 
-    tipo: TipoMantenimiento
+  tipo: TipoMantenimiento
+  tipo_display: string
 
-    fechaInicio: string 
+  estado: EstadoMantenimiento
+  estado_display: string
 
-    fechaFin: string 
+  fechaInicio: string
+  fechaFin: string,
 
-    estado: EstadoMantenimiento
-
-    responsable:number
+  diagnostico:string
 }
-
-
-
-
