@@ -24,6 +24,8 @@ export const crearCertificado = async (
 export const listarCertificados = async () : Promise<CertificadoMetrologicoResponse[]> => {
     const response = await api.get("/certificados/")
 
+    console.log("RESPONSE:",response.data)
+
     const data = response.data.results || response.data 
 
     return data.map((c:any) => ({

@@ -1,63 +1,59 @@
 "use client";
 
-import { useAction } from "@/hooks/useAction";
-import { useError } from "@/hooks/useError";
-import { UseForm } from "@/hooks/useForm";
-import { iniciarSesion } from "@/services/auth/login.service";
-import { LoginRequest } from "@/types/auth/login.type";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { UseForm } from "../../hooks/useForm";
+import { LoginRequest } from "@/types/auth/login.type";
+import { useAction } from "@/hooks/useAction";
+import { iniciarSesion } from "@/services/auth/login.service";
+import { useError } from "@/hooks/useError";
 import InputField from "../ui/input/InputField";
 
 const features = [
     {
-        title:"Hojas de vida",
-        desc:"Registro completo y actualizado",
+        title: "Hojas de vida",
+        desc: "Registro completo y actualizado de cada equipo biomédico.",
     },
     {
-        title:"Mantenimientos preventivos",
-        desc:"Programar, ejecuta y documenta intervenciones técnicas."
+        title: "Mantenimientos preventivos y correctivos",
+        desc: "Programa, ejecuta y documenta intervenciones técnicas.",
     },
     {
-        title:"Reportes y trazabilidad",
-        desc:"Consulta el estado e historial de cada equipo en tiempo real",
+        title: "Reportes y trazabilidad",
+        desc: "Consulta el estado e historial de cada equipo en tiempo real.",
     },
     {
-        title:"Usuarios y roles",
-        desc:"Control de acceso por rol dentro de la clínica",
-    }
+        title: "Usuarios y roles",
+        desc: "Control de acceso por rol dentro de la clínica.",
+    },
 ];
- export default function InicioSesionPage() {
+
+export default function InicioSesionPage() {
     const router = useRouter();
-    
-    const {formData,handleChange} = UseForm<LoginRequest>({
-        correo:"",
-        password:"",
-    })
 
-    const {error,handleError} = useError();
-    const {execute:login,loading} = useAction(iniciarSesion);
+    const { formData, handleChange } = UseForm<LoginRequest>({
+        correo: "",
+        password: "",
+    });
 
-    const handleSubmit = async (e:React.FormEvent) => {
+    const { error, handleError } = useError();
+    const { execute: login, loading } = useAction(iniciarSesion);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const response = await login(formData);
-
         if (!response) return;
 
-        localStorage.setItem("usuario",response.usuario);
-        localStorage.setItem("rol",response.rol);
-
-        localStorage.setItem("access",response.access);
-        localStorage.setItem("refresh",response.refresh);
-        
+        localStorage.setItem("usuario", response.usuario);
+        localStorage.setItem("rol", response.rol);
         document.cookie = `rol=${response.rol}; path=/; SameSite=Lax`;
 
         router.push("/dashboard");
-    }
+    };
 
     return (
-         <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
             {/* PANEL IZQUIERDO — Branding + información de la app */}
             <aside className="relative hidden lg:flex flex-col justify-between p-12 text-white overflow-hidden bg-gradient-to-br from-[#d71920] via-[#b2141a] to-[#7a0d12]">
                 <div className="relative z-10 max-w-lg">
@@ -191,5 +187,5 @@ const features = [
                 </div>
             </section>
         </div>
-    )
+    );
 }
