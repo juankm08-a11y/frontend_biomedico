@@ -47,6 +47,9 @@ export default function InicioSesionPage() {
 
         localStorage.setItem("usuario", response.usuario);
         localStorage.setItem("rol", response.rol);
+        localStorage.setItem("access",response.access);
+        localStorage.setItem("refresh",response.refresh);
+        
         document.cookie = `rol=${response.rol}; path=/; SameSite=Lax`;
 
         router.push("/dashboard");

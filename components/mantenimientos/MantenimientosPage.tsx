@@ -62,12 +62,12 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
     const [usuarios,setUsuarios] = useState<UsuarioResponse[]>([])
 
     const [formMantenimiento,setFormMantenimiento] = useState<MantenimientoRequest>({
-        equipo_id:0,
+        equipo_id:1,
         tipo:"preventivo",
         fecha_inicio:"",
         fecha_fin:"",
         estado:"pendiente",
-        responsable_id:0,
+        responsable_id:1,
         diagnostico:""
     })
 
@@ -126,6 +126,18 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
             return
         }
 
+        if (usuarios.length === 0) {
+            alert("Usuarios no cargados aún")
+            return
+        }
+
+        if (!mantenimientoData.responsable_id) {
+            alert("Responsable inválido")
+            return 
+        }
+
+        console.log("RESPONSABLE_ID:", mantenimientoData.responsable_id)
+
         await crearMantenimiento({
                 diagnostico: mantenimientoData.diagnostico,
                 tipo: mantenimientoData.tipo,
@@ -142,6 +154,8 @@ export default function MantenimientosPage({tipo}:{tipo:string}) {
             alert("Mantenimiento creado con exito")
 
             listarMantenimientos(tipo).then(setMantenimientos)
+
+            setMostrarFormularioMantenimiento(false)
     }
 
     const handleCrearOrden = async () => {

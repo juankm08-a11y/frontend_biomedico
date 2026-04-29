@@ -99,7 +99,7 @@ export default function HojasVidaPage() {
         {value:"2",label:"GE Healthcare"},
         {value:"3",label:"Siemenens Healthineers"},
         {value:"4",label:"Mindray Bio-Medical Electronics"},
-        {value:"5",label:"Dragerwerk AG"},
+        {value:"5",label:"Dragerwerk Ventilator"},
         {value:"new",label:"Crear nuevo modelo"}
     ])
 
